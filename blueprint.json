@@ -1,0 +1,27 @@
+{
+  "currencies": ["USD","EUR","CHF","JPY","NZD","AUD","CAD","GBP"],
+  "indicators": [
+    {
+      "id": "us_fomc_rate_decision",
+      "name": "FOMC Rate Decision",
+      "ccy": "USD",
+      "impact": "high",
+      "freq": "8x/year",
+      "fields": ["actual","consensus","prior","statement","press_conf"],
+      "dir_rule": "hawkish_is_bullish",
+      "typical_release_utc": "18:00-20:00",
+      "notes": "Use decision + statement + dot_plot if SEP"
+    },
+    {
+      "id": "us_cpi_core_yoy",
+      "name": "CPI Core YoY",
+      "ccy": "USD",
+      "impact": "high",
+      "freq": "monthly",
+      "fields": ["actual","consensus","prior"],
+      "dir_rule": "higher_is_bullish",
+      "typical_release_utc": "12:30",
+      "transform": "surprise = actual - consensus"
+    }
+  ]
+}
