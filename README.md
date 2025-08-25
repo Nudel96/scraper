@@ -1,1 +1,0 @@
-# weekly-quest.yml
