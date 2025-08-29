@@ -1,0 +1,428 @@
+# Asset Mapping Configuration
+# ============================
+# Maps scraper series_ids to trading assets and categorizes them into pillars
+
+version: "1.0.0"
+last_updated: "2025-08-29"
+
+# Trading Assets Configuration
+assets:
+  USD:
+    name: "US Dollar"
+    type: "currency"
+    major_pair: true
+    description: "United States Dollar - World's primary reserve currency"
+  
+  EUR:
+    name: "Euro"
+    type: "currency"
+    major_pair: true
+    description: "European Union Euro"
+  
+  GBP:
+    name: "British Pound"
+    type: "currency"
+    major_pair: true
+    description: "British Pound Sterling"
+  
+  JPY:
+    name: "Japanese Yen"
+    type: "currency"
+    major_pair: true
+    description: "Japanese Yen"
+  
+  AUD:
+    name: "Australian Dollar"
+    type: "currency"
+    major_pair: false
+    description: "Australian Dollar"
+  
+  CAD:
+    name: "Canadian Dollar"
+    type: "currency"
+    major_pair: false
+    description: "Canadian Dollar"
+  
+  CHF:
+    name: "Swiss Franc"
+    type: "currency"
+    major_pair: false
+    description: "Swiss Franc"
+  
+  NZD:
+    name: "New Zealand Dollar"
+    type: "currency"
+    major_pair: false
+    description: "New Zealand Dollar"
+  
+  USOIL:
+    name: "US Oil"
+    type: "commodity"
+    major_pair: false
+    description: "West Texas Intermediate Crude Oil"
+
+# Pillar Definitions
+pillars:
+  Macro:
+    name: "Macroeconomic"
+    description: "Economic fundamentals and monetary policy"
+    weight: 1.0
+    indicators:
+      - inflation
+      - interest_rates
+      - gdp
+      - employment
+      - trade_balance
+      - government_spending
+  
+  Sentiment:
+    name: "Market Sentiment"
+    description: "Market psychology and confidence indicators"
+    weight: 0.8
+    indicators:
+      - consumer_confidence
+      - business_confidence
+      - pmi_indices
+      - market_volatility
+      - risk_appetite
+  
+  Trend:
+    name: "Technical Trend"
+    description: "Price action and technical indicators"
+    weight: 0.6
+    indicators:
+      - price_momentum
+      - moving_averages
+      - support_resistance
+      - volume_analysis
+
+# Series ID to Asset Mapping
+# Format: series_id -> {asset, pillar, key, weight, frequency}
+mappings:
+  # United States (USD)
+  US_CPI:
+    asset: "USD"
+    pillar: "Macro"
+    key: "cpi_yoy"
+    weight: 3.0
+    frequency: "monthly"
+    description: "US Consumer Price Index Year-over-Year"
+    impact: "high"
+  
+  US_CPI_CORE:
+    asset: "USD"
+    pillar: "Macro"
+    key: "cpi_core_yoy"
+    weight: 3.0
+    frequency: "monthly"
+    description: "US Core CPI (excluding food and energy)"
+    impact: "high"
+  
+  US_FOMC_RATE:
+    asset: "USD"
+    pillar: "Macro"
+    key: "fed_rate"
+    weight: 4.0
+    frequency: "irregular"
+    description: "Federal Reserve Interest Rate Decision"
+    impact: "high"
+  
+  US_NFP:
+    asset: "USD"
+    pillar: "Macro"
+    key: "nonfarm_payrolls"
+    weight: 3.5
+    frequency: "monthly"
+    description: "US Non-Farm Payrolls"
+    impact: "high"
+  
+  US_UNEMPLOYMENT:
+    asset: "USD"
+    pillar: "Macro"
+    key: "unemployment_rate"
+    weight: 2.5
+    frequency: "monthly"
+    description: "US Unemployment Rate"
+    impact: "medium"
+  
+  US_GDP:
+    asset: "USD"
+    pillar: "Macro"
+    key: "gdp_qoq"
+    weight: 3.0
+    frequency: "quarterly"
+    description: "US Gross Domestic Product Quarter-over-Quarter"
+    impact: "high"
+  
+  US_RETAIL_SALES:
+    asset: "USD"
+    pillar: "Macro"
+    key: "retail_sales"
+    weight: 2.0
+    frequency: "monthly"
+    description: "US Retail Sales"
+    impact: "medium"
+  
+  US_ISM_MANUFACTURING:
+    asset: "USD"
+    pillar: "Sentiment"
+    key: "ism_manufacturing"
+    weight: 2.5
+    frequency: "monthly"
+    description: "US ISM Manufacturing PMI"
+    impact: "medium"
+  
+  US_ISM_SERVICES:
+    asset: "USD"
+    pillar: "Sentiment"
+    key: "ism_services"
+    weight: 2.5
+    frequency: "monthly"
+    description: "US ISM Services PMI"
+    impact: "medium"
+  
+  US_CONSUMER_CONFIDENCE:
+    asset: "USD"
+    pillar: "Sentiment"
+    key: "consumer_confidence"
+    weight: 1.5
+    frequency: "monthly"
+    description: "US Consumer Confidence Index"
+    impact: "low"
+
+  # European Union (EUR)
+  EU_CPI:
+    asset: "EUR"
+    pillar: "Macro"
+    key: "cpi_yoy"
+    weight: 3.0
+    frequency: "monthly"
+    description: "Eurozone Consumer Price Index"
+    impact: "high"
+  
+  EU_ECB_RATE:
+    asset: "EUR"
+    pillar: "Macro"
+    key: "ecb_rate"
+    weight: 4.0
+    frequency: "irregular"
+    description: "European Central Bank Interest Rate"
+    impact: "high"
+  
+  EU_GDP:
+    asset: "EUR"
+    pillar: "Macro"
+    key: "gdp_qoq"
+    weight: 3.0
+    frequency: "quarterly"
+    description: "Eurozone GDP Quarter-over-Quarter"
+    impact: "high"
+  
+  EU_UNEMPLOYMENT:
+    asset: "EUR"
+    pillar: "Macro"
+    key: "unemployment_rate"
+    weight: 2.0
+    frequency: "monthly"
+    description: "Eurozone Unemployment Rate"
+    impact: "medium"
+  
+  EU_PMI_MANUFACTURING:
+    asset: "EUR"
+    pillar: "Sentiment"
+    key: "pmi_manufacturing"
+    weight: 2.5
+    frequency: "monthly"
+    description: "Eurozone Manufacturing PMI"
+    impact: "medium"
+  
+  EU_PMI_SERVICES:
+    asset: "EUR"
+    pillar: "Sentiment"
+    key: "pmi_services"
+    weight: 2.5
+    frequency: "monthly"
+    description: "Eurozone Services PMI"
+    impact: "medium"
+
+  # United Kingdom (GBP)
+  UK_CPI:
+    asset: "GBP"
+    pillar: "Macro"
+    key: "cpi_yoy"
+    weight: 3.0
+    frequency: "monthly"
+    description: "UK Consumer Price Index"
+    impact: "high"
+  
+  UK_BOE_RATE:
+    asset: "GBP"
+    pillar: "Macro"
+    key: "boe_rate"
+    weight: 4.0
+    frequency: "irregular"
+    description: "Bank of England Interest Rate"
+    impact: "high"
+  
+  UK_GDP:
+    asset: "GBP"
+    pillar: "Macro"
+    key: "gdp_qoq"
+    weight: 3.0
+    frequency: "quarterly"
+    description: "UK GDP Quarter-over-Quarter"
+    impact: "high"
+  
+  UK_UNEMPLOYMENT:
+    asset: "GBP"
+    pillar: "Macro"
+    key: "unemployment_rate"
+    weight: 2.0
+    frequency: "monthly"
+    description: "UK Unemployment Rate"
+    impact: "medium"
+
+  # Japan (JPY)
+  JP_CPI:
+    asset: "JPY"
+    pillar: "Macro"
+    key: "cpi_yoy"
+    weight: 3.0
+    frequency: "monthly"
+    description: "Japan Consumer Price Index"
+    impact: "high"
+  
+  JP_BOJ_RATE:
+    asset: "JPY"
+    pillar: "Macro"
+    key: "boj_rate"
+    weight: 4.0
+    frequency: "irregular"
+    description: "Bank of Japan Interest Rate"
+    impact: "high"
+  
+  JP_GDP:
+    asset: "JPY"
+    pillar: "Macro"
+    key: "gdp_qoq"
+    weight: 3.0
+    frequency: "quarterly"
+    description: "Japan GDP Quarter-over-Quarter"
+    impact: "high"
+
+  # Australia (AUD)
+  AU_CPI:
+    asset: "AUD"
+    pillar: "Macro"
+    key: "cpi_yoy"
+    weight: 3.0
+    frequency: "quarterly"
+    description: "Australia Consumer Price Index"
+    impact: "high"
+  
+  AU_RBA_RATE:
+    asset: "AUD"
+    pillar: "Macro"
+    key: "rba_rate"
+    weight: 4.0
+    frequency: "irregular"
+    description: "Reserve Bank of Australia Interest Rate"
+    impact: "high"
+
+  # Canada (CAD)
+  CA_CPI:
+    asset: "CAD"
+    pillar: "Macro"
+    key: "cpi_yoy"
+    weight: 3.0
+    frequency: "monthly"
+    description: "Canada Consumer Price Index"
+    impact: "high"
+  
+  CA_BOC_RATE:
+    asset: "CAD"
+    pillar: "Macro"
+    key: "boc_rate"
+    weight: 4.0
+    frequency: "irregular"
+    description: "Bank of Canada Interest Rate"
+    impact: "high"
+
+  # Switzerland (CHF)
+  CH_CPI:
+    asset: "CHF"
+    pillar: "Macro"
+    key: "cpi_yoy"
+    weight: 3.0
+    frequency: "monthly"
+    description: "Switzerland Consumer Price Index"
+    impact: "medium"
+  
+  CH_SNB_RATE:
+    asset: "CHF"
+    pillar: "Macro"
+    key: "snb_rate"
+    weight: 4.0
+    frequency: "irregular"
+    description: "Swiss National Bank Interest Rate"
+    impact: "high"
+
+  # New Zealand (NZD)
+  NZ_CPI:
+    asset: "NZD"
+    pillar: "Macro"
+    key: "cpi_yoy"
+    weight: 3.0
+    frequency: "quarterly"
+    description: "New Zealand Consumer Price Index"
+    impact: "medium"
+  
+  NZ_RBNZ_RATE:
+    asset: "NZD"
+    pillar: "Macro"
+    key: "rbnz_rate"
+    weight: 4.0
+    frequency: "irregular"
+    description: "Reserve Bank of New Zealand Interest Rate"
+    impact: "high"
+
+  # Commodities
+  CRUDE_OIL_WTI:
+    asset: "USOIL"
+    pillar: "Macro"
+    key: "oil_price"
+    weight: 2.0
+    frequency: "daily"
+    description: "West Texas Intermediate Crude Oil Price"
+    impact: "medium"
+  
+  GOLD_SPOT:
+    asset: "USD"  # Gold typically inversely correlated with USD
+    pillar: "Sentiment"
+    key: "gold_price"
+    weight: 1.5
+    frequency: "daily"
+    description: "Gold Spot Price (inverse USD correlation)"
+    impact: "low"
+
+# Scoring Rules
+scoring_rules:
+  # Impact multipliers
+  impact_multipliers:
+    high: 3.0
+    medium: 1.5
+    low: 0.75
+  
+  # Frequency decay (half-life in days)
+  frequency_decay:
+    daily: 7
+    weekly: 14
+    monthly: 45
+    quarterly: 90
+    irregular: 90
+  
+  # Pillar weights in final score calculation
+  pillar_weights:
+    Macro: 1.0
+    Sentiment: 0.8
+    Trend: 0.6

@@ -1,0 +1,256 @@
+# Automation Scheduler Configuration
+# ==================================
+# Configuration for automated data collection and synchronization
+
+version: "1.0.0"
+last_updated: "2025-08-29"
+
+# General scheduler settings
+check_interval: 60  # Check for jobs every 60 seconds
+max_workers: 4      # Maximum concurrent jobs
+log_level: "INFO"   # DEBUG, INFO, WARNING, ERROR
+
+# Environment variables for all jobs
+global_environment:
+  PYTHONPATH: "."
+  TZ: "UTC"
+
+# Job definitions
+jobs:
+  # Data Collection Jobs
+  - name: "scraper_data_collection"
+    description: "Collect economic data from FRED and World Bank APIs"
+    command: "python scraper/main.py"
+    schedule: "0 */6 * * *"  # Every 6 hours at minute 0
+    enabled: true
+    timeout: 600  # 10 minutes
+    retry_count: 3
+    retry_delay: 300  # 5 minutes between retries
+    environment:
+      FRED_API_KEY: "${FRED_API_KEY}"  # Set from environment
+    notifications:
+      on_failure: true
+      on_success: false
+
+  # Data Synchronization
+  - name: "bridge_sync"
+    description: "Sync scraper data to backend database"
+    command: "python bridge_scraper_to_backend.py"
+    schedule: "15 */6 * * *"  # 15 minutes after data collection
+    enabled: true
+    timeout: 300  # 5 minutes
+    retry_count: 3
+    retry_delay: 120  # 2 minutes between retries
+    depends_on: ["scraper_data_collection"]  # Wait for data collection
+    notifications:
+      on_failure: true
+      on_success: true
+
+  # Score Recomputation
+  - name: "backend_score_recompute"
+    description: "Recompute bias scores for all assets"
+    command: "curl -X POST http://localhost:8000/jobs/recompute-bias"
+    schedule: "30 */6 * * *"  # 30 minutes after data collection
+    enabled: true
+    timeout: 120  # 2 minutes
+    retry_count: 2
+    retry_delay: 60
+    depends_on: ["bridge_sync"]
+    notifications:
+      on_failure: true
+      on_success: false
+
+  # Health Checks
+  - name: "backend_health_check"
+    description: "Check backend API health"
+    command: "curl -f http://localhost:8000/health"
+    schedule: "*/15 * * * *"  # Every 15 minutes
+    enabled: true
+    timeout: 30
+    retry_count: 1
+    retry_delay: 30
+    notifications:
+      on_failure: true
+      on_success: false
+
+  # Database Maintenance
+  - name: "database_cleanup"
+    description: "Clean up old data and optimize database"
+    command: "python maintenance/database_cleanup.py"
+    schedule: "0 2 * * 0"  # Weekly on Sunday at 2 AM
+    enabled: true
+    timeout: 1800  # 30 minutes
+    retry_count: 1
+    retry_delay: 3600  # 1 hour
+    notifications:
+      on_failure: true
+      on_success: true
+
+  # Asset Mapping Updates
+  - name: "update_asset_mappings"
+    description: "Update backend weights from asset mapping config"
+    command: "python asset_mapping_system.py --update-backend"
+    schedule: "0 1 * * *"  # Daily at 1 AM
+    enabled: true
+    timeout: 60
+    retry_count: 2
+    retry_delay: 300
+    notifications:
+      on_failure: true
+      on_success: false
+
+  # Test Jobs (disabled by default)
+  - name: "test_scraper"
+    description: "Test scraper functionality"
+    command: "python bridge_scraper_to_backend.py --dry-run"
+    schedule: "0 12 * * *"  # Daily at noon
+    enabled: false  # Disabled for production
+    timeout: 180
+    retry_count: 1
+    notifications:
+      on_failure: true
+      on_success: false
+
+  - name: "test_backend_endpoints"
+    description: "Test backend API endpoints"
+    command: "python test_backend_extensions.py"
+    schedule: "30 12 * * *"  # Daily at 12:30 PM
+    enabled: false  # Disabled for production
+    timeout: 120
+    retry_count: 1
+    notifications:
+      on_failure: true
+      on_success: false
+
+# Notification settings
+notifications:
+  enabled: true
+  
+  # Email notifications (configure SMTP)
+  email:
+    enabled: false
+    smtp_server: "smtp.gmail.com"
+    smtp_port: 587
+    username: "${EMAIL_USERNAME}"
+    password: "${EMAIL_PASSWORD}"
+    from_address: "noreply@trading-heatmap.com"
+    to_addresses:
+      - "admin@trading-heatmap.com"
+  
+  # Webhook notifications
+  webhook:
+    enabled: false
+    url: "https://hooks.slack.com/services/YOUR/SLACK/WEBHOOK"
+    headers:
+      Content-Type: "application/json"
+  
+  # Log-based notifications (always enabled)
+  log:
+    enabled: true
+    level: "ERROR"  # Only log errors and above
+
+# Monitoring and alerting
+monitoring:
+  enabled: true
+  
+  # Health check intervals
+  health_checks:
+    backend_api: 300  # Check every 5 minutes
+    database: 600    # Check every 10 minutes
+    disk_space: 3600 # Check every hour
+  
+  # Alert thresholds
+  alerts:
+    consecutive_failures: 3  # Alert after 3 consecutive failures
+    disk_space_threshold: 85  # Alert when disk usage > 85%
+    memory_threshold: 90      # Alert when memory usage > 90%
+    response_time_threshold: 5000  # Alert when response time > 5 seconds
+
+# Logging configuration
+logging:
+  level: "INFO"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  
+  # Log files
+  files:
+    main: "logs/automation.log"
+    jobs: "logs/jobs.log"
+    errors: "logs/errors.log"
+  
+  # Log rotation
+  rotation:
+    max_size: "10MB"
+    backup_count: 5
+    when: "midnight"
+    interval: 1
+
+# Security settings
+security:
+  # Allowed commands (whitelist)
+  allowed_commands:
+    - "python"
+    - "curl"
+    - "bash"
+  
+  # Environment variable restrictions
+  restricted_env_vars:
+    - "PATH"
+    - "HOME"
+    - "USER"
+  
+  # Maximum execution time for any job
+  max_execution_time: 3600  # 1 hour
+
+# Performance settings
+performance:
+  # Resource limits per job
+  limits:
+    memory: "512MB"
+    cpu_percent: 50
+    disk_io: "100MB/s"
+  
+  # Concurrency settings
+  max_concurrent_jobs: 4
+  job_queue_size: 20
+  
+  # Timeout settings
+  default_timeout: 300
+  max_timeout: 3600
+
+# Development settings
+development:
+  # Enable debug mode
+  debug: false
+  
+  # Dry run mode (don't actually execute commands)
+  dry_run: false
+  
+  # Test mode settings
+  test_mode:
+    enabled: false
+    mock_external_apis: true
+    use_test_database: true
+
+# Backup and recovery
+backup:
+  enabled: true
+  
+  # Database backups
+  database:
+    schedule: "0 3 * * *"  # Daily at 3 AM
+    retention_days: 30
+    compression: true
+    location: "backups/database/"
+  
+  # Configuration backups
+  config:
+    schedule: "0 4 * * 0"  # Weekly on Sunday at 4 AM
+    retention_weeks: 12
+    location: "backups/config/"
+  
+  # Log backups
+  logs:
+    schedule: "0 5 * * 0"  # Weekly on Sunday at 5 AM
+    retention_weeks: 8
+    compression: true
+    location: "backups/logs/"
